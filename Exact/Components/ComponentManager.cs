@@ -45,6 +45,20 @@ public class ComponentManager
         _attributeSelectors.Add((onlyForTag, attr), action);
     }
 
+    public void UpdateVar(string var, CompileAction newAction)
+    {
+        foreach (var i in _varSelectors)
+        {
+            if (i.VarName == var)
+            {
+                _varSelectors.Remove(i);
+                _varSelectors.Add(new(var, newAction));
+                break;
+            }
+        }
+        _varSelectors.Add(new(var, newAction));
+    }
+
     public void AttachVar(string var, CompileAction action)
     {
         _varSelectors.Add(new VarSelector(var, action));
@@ -52,10 +66,33 @@ public class ComponentManager
 
     public ComponentManager DeriveWith(List<VarSelector> vars)
     {
-        return new([.._tagSelectors], [], [.._varSelectors, ..vars]);
+        List<AttributeSelector> selectors = [];
+        foreach (var i in _attributeSelectors)
+        {
+            selectors.Add(new(i.Key.Item2, i.Value,  i.Key.Item1));
+        }
+        
+        return new(_tagSelectors, selectors, [.._varSelectors, ..vars]);
     }
     
-    private string TryGetVar(string text, ExactContext ctx)
+    public object? TryGetVarObject(string text, ExactContext ctx)
+    {
+        text = text.Trim();
+        if (text.StartsWith('@'))
+        {
+            var varName = text.Substring(1);
+            var selector = _varSelectors.Find(x => x.VarName == varName);
+
+            if (selector != null)
+            {
+                return selector.Action(ctx, null, this);
+            }
+        }
+
+        return null;
+    }
+    
+    public string TryGetVar(string text, ExactContext ctx)
     {
         text = text.Trim();
         if (text.StartsWith('@'))
@@ -105,6 +142,7 @@ public class ComponentManager
             if (selector != null)
             {
                 builder.Append(selector.Action(ctx, element, this));
+                return builder.ToString();
             }
             else
             {
@@ -146,7 +184,6 @@ public class ComponentManager
 
             if (element.IsEmpty)
             {
-                builder.Remove(builder.Length - 1, 1);
                 builder.Append("/>");
             }
             else

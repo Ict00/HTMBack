@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Exact.Base;
+using Exact.Builtins;
 using Exact.Builtins.Contents;
 using Exact.Components;
 using Exact.EContent;
@@ -24,6 +25,9 @@ public class Server
         _contents = [];
         _listener = new HttpListener();
         _listener.Prefixes.Add(address);
+        
+        _componentManager.AttachTag("ex-if", Tags.IF_TAG);
+        _componentManager.AttachTag("ex-foreach", Tags.FOREACH_TAG);
     }
 
     public void Start()
@@ -114,14 +118,14 @@ public class Server
         _middlewares.Add(new T());
     }
 
-    public void AddFile(string filePath, string? name = null, bool cached = false)
+    public void AddFile(string filePath, string? name = null, bool cached = false, string fileType = "text/html")
     {
         if (name == null)
         {
-            name = new FileInfo(filePath).Name.Split('.')[0];
+            name = new FileInfo(filePath).Name;
         }
         
-        var file = new StaticFile($"/exact_api/{name}/", filePath, cached);
+        var file = new StaticFile($"/exact_api/{name}/", filePath, cached, new ContentTemplate(fileType));
         
         _contents.Add(file);
     }
