@@ -1,0 +1,15 @@
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>HTMBack.Template</id>
+        <version>0.1.0</version>
+        <authors>Ict00</authors>
+        <description>Template for HTMBack micro web-framework</description>
+        <packageTypes>
+            <packageType name="Template" />
+        </packageTypes>
+        <license type="expression">MIT</license>
+    </metadata>
+    <files>
+        <file src="**\*" exclude="**\bin\**;**\obj\**;*.nuspec" target="content" />
+    </files>
+</package>

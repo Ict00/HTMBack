@@ -35,7 +35,7 @@ public class ComponentManager
             {
                 _varSelectors.Remove(i);
                 _varSelectors.Add(new(var, newAction));
-                break;
+                return;
             }
         }
         _varSelectors.Add(new(var, newAction));
@@ -70,10 +70,17 @@ public class ComponentManager
         }
 
         bool doInverse = false;
+        bool checkIfNull = false;
 
         if (varDefinition[0] == '!')
         {
             doInverse = true;
+            varDefinition = varDefinition.Substring(1);
+        }
+
+        if (varDefinition[0] == '?')
+        {
+            checkIfNull = true;
             varDefinition = varDefinition.Substring(1);
         }
 
@@ -119,8 +126,39 @@ public class ComponentManager
                         return null;
                     }
 
-                    return GetRecProperty(fieldLevels[1], obj, 1);
+                    var a = GetRecProperty(fieldLevels[1], obj, 1);
+
+                    if (checkIfNull)
+                    {
+                        a = a == null;
+                    }
+                    
+                    if (a is bool c)
+                    {
+                        if (doInverse)
+                        {
+                            return !c;
+                        }
+                        else
+                        {
+                            return c;
+                        }
+                    }
+                    else
+                    {
+                        return a;
+                    }
                 }
+
+                if (checkIfNull)
+                {
+                    obj = obj == null;
+                    if (doInverse)
+                    {
+                        return !(bool)obj;
+                    }
+                }
+                
                 return obj;
             }
         }

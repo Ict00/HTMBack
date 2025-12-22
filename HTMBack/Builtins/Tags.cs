@@ -75,6 +75,8 @@ public static class Tags
                             {
                                 builder.Append(newMgr.CompileXmlToHtml(c, ctx));
                             }
+                            Console.WriteLine($"{name} - {i}");
+                            Console.WriteLine(builder.ToString());
                         }
                     }
                     else

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Ict00",
+  "classifications": ["Web", "HTMX", "C#"],
+  "identity": "HTMBack.Template",
+  "name": "HTMBack Web App",
+  "shortName": "HTMBack",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "HTMBack.Template",
+  "preferNameDirectory": true
+}

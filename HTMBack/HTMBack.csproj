@@ -5,5 +5,21 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
+    
+    <PropertyGroup>
+        <PackageId>HTMBack</PackageId>
+        <Version>0.1</Version>
+        <Authors>Ict00</Authors>
+        <Description>Micro web framework for HTMX x C#</Description>
+        <PackageTags>web microframework server-side ssr htmx</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/Ict00/HTMBack</RepositoryUrl>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        
+    </PropertyGroup>
 
+    <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath="/"/>
+    </ItemGroup>
 </Project>

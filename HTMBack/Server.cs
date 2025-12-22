@@ -102,6 +102,7 @@ public class Server
                     ctx.Response.KeepAlive = returnContent.KeepAlive;
 
                     await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    ctx.Response.Close();
                 }
                 catch (Exception ex)
                 {
