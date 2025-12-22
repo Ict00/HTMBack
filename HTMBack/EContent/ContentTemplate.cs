@@ -1,4 +1,4 @@
-namespace Exact.EContent;
+namespace HTMBack.EContent;
 
 public record ContentTemplate(string Type = "text/html", int Response = 200);
 

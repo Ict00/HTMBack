@@ -1,7 +1,7 @@
 using System.Net;
-using Exact.EContent;
+using HTMBack.EContent;
 
-namespace Exact.Middleware;
+namespace HTMBack.Middleware;
 
 public abstract class AMiddleware
 {

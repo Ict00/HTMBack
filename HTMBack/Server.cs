@@ -1,13 +1,13 @@
 using System.Net;
 using System.Text;
-using Exact.Base;
-using Exact.Builtins;
-using Exact.Builtins.Contents;
-using Exact.Components;
-using Exact.EContent;
-using Exact.Middleware;
+using HTMBack.Base;
+using HTMBack.Builtins;
+using HTMBack.Builtins.Contents;
+using HTMBack.Components;
+using HTMBack.EContent;
+using HTMBack.Middleware;
 
-namespace Exact;
+namespace HTMBack;
 
 public class Server
 {
@@ -30,87 +30,84 @@ public class Server
         _componentManager.AttachTag("ex-foreach", Tags.FOREACH_TAG);
     }
 
-    public void Start()
+    public async Task Start()
     {
         _listener.Start();
         Console.WriteLine("Started > ");
-        ThreadPool.QueueUserWorkItem(_ =>
+        try
         {
-            try
-            {
-                while (_listener.IsListening)
+            while (_listener.IsListening) {
+                var ctx = await _listener.GetContextAsync();
+                var request = ctx.Request;
+                    
+                bool doContinue = false;
+                    
+                foreach (var i in _middlewares)
                 {
-                    var ctx = _listener.GetContext();
-                    var request = ctx.Request;
-                    
-                    bool doContinue = false;
-                    
-                    foreach (var i in _middlewares)
+                    var result = i.Process(ctx, out var x);
+                    if (result == MiddlewareResult.Fail)
                     {
-                        var result = i.Process(ctx, out var x);
-                        if (result == MiddlewareResult.Fail)
-                        {
-                            var responseContent = x ?? new Content("text/html", "<h1>Request couldn't be satisfied</h1>", 403);
-                            doContinue = true;
+                        var responseContent = x ?? new Content("text/html", "<h1>Request couldn't be satisfied</h1>", 403);
+                        doContinue = true;
                             
-                            byte[] buf = Encoding.UTF8.GetBytes(responseContent.Text);
-                            ctx.Response.ContentLength64 = buf.Length;
-                            ctx.Response.StatusCode = responseContent.ResponseMsg;
-                            ctx.Response.ContentType = responseContent.Type;
+                        byte[] buf = Encoding.UTF8.GetBytes(responseContent.Text);
+                        ctx.Response.ContentLength64 = buf.Length;
+                        ctx.Response.StatusCode = responseContent.ResponseMsg;
+                        ctx.Response.ContentType = responseContent.Type;
                     
-                            ctx.Response.OutputStream.Write(buf, 0, buf.Length);
-                        }
+                        ctx.Response.OutputStream.Write(buf, 0, buf.Length);
                     }
-                    
-                    if (doContinue)
-                        continue;
-                    
-                    
-                    
-                    
-                    List<UriVar> vars = [];
-                    string newPath = "/";
-
-                    if (request.RawUrl != null)
-                    {
-                        foreach (var i in request.RawUrl.Split('/'))
-                        {
-                            if (i != "")
-                            {
-                                newPath += $"{i.Split('?')[0]}/";
-                                vars.AddRange(i.GetVars());
-                            }
-                        }
-                    }
-
-                    newPath = newPath.Replace("//", "/");
-                    
-                    Console.WriteLine($"Requested > {newPath}");
-
-                    var returnContent = new Content("text/html", "<h1>Not found</h1>", 404);
-                    
-                    foreach (var i in _contents)
-                    {
-                        if (i.Route.Path == newPath && i.Route.Type == ctx.Request.HttpMethod)
-                        {
-                            returnContent = i.Produce(ctx.ToExact(vars), _componentManager);
-                            break;
-                        }
-                    }
-                    
-                    byte[] buffer = Encoding.UTF8.GetBytes(returnContent.Text);
-                    ctx.Response.ContentLength64 = buffer.Length;
-                    ctx.Response.StatusCode = returnContent.ResponseMsg;
-                    ctx.Response.ContentType = returnContent.Type;
-                    
-                    ctx.Response.OutputStream.Write(buffer, 0, buffer.Length);
                 }
+                    
+                if (doContinue)
+                    continue;
+                    
+                    
+                    
+                    
+                List<UriVar> vars = [];
+                string newPath = "/";
+
+                if (request.RawUrl != null)
+                {
+                    foreach (var i in request.RawUrl.Split('/'))
+                    {
+                        if (i != "")
+                        {
+                            newPath += $"{i.Split('?')[0]}/";
+                            vars.AddRange(i.GetVars());
+                        }
+                    }
+                }
+
+                newPath = newPath.Replace("//", "/");
+                    
+                Console.WriteLine($"Requested > {newPath}");
+
+                var returnContent = new Content("text/html", "<h1>Not found</h1>", 404);
+
+                foreach (var i in _contents)
+                {
+                    if (i.Route.Path == newPath && i.Route.Type == ctx.Request.HttpMethod)
+                    {
+                        returnContent = i.Produce(ctx.ToExact(vars), _componentManager);
+                        break;
+                    }
+                }
+
+                byte[] buffer = Encoding.UTF8.GetBytes(returnContent.Text);
+                ctx.Response.ContentLength64 = buffer.Length;
+                ctx.Response.StatusCode = returnContent.ResponseMsg;
+                ctx.Response.ContentType = returnContent.Type;
+                ctx.Response.KeepAlive = false;
+                    
+                await ctx.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
             }
-            catch
-            {
-                //
-            }
-        });
+        }
+        catch
+        {
+            //
+        }
     }
 
     public void Using<T>() where T : AMiddleware, new()

@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Exact", "Exact\Exact.csproj", "{F0EF8F30-F1CB-4749-A636-CB3434F6EBD8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTMBack", "HTMBack\HTMBack.csproj", "{F0EF8F30-F1CB-4749-A636-CB3434F6EBD8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExactTest", "ExactTest\ExactTest.csproj", "{84309B3C-991C-4658-B94E-D5ED06189978}"
 EndProject

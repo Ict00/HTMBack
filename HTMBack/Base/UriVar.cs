@@ -1,4 +1,4 @@
-namespace Exact.Base;
+namespace HTMBack.Base;
 
 public record UriVar(string Name, string Content);
 

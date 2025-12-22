@@ -1,7 +1,7 @@
-using Exact.Base;
-using Exact.Components;
+using HTMBack.Base;
+using HTMBack.Components;
 
-namespace Exact.EContent;
+namespace HTMBack.EContent;
 
 public interface IProduceContent
 {

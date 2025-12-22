@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Exact.Base;
+namespace HTMBack.Base;
 
 public record ExactContext(HttpListenerContext Ctx, List<UriVar> Vars);
 

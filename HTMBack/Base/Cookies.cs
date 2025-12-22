@@ -1,7 +1,7 @@
 using System.Net;
 #pragma warning disable CS8601
 
-namespace Exact.Base;
+namespace HTMBack.Base;
 
 public static class Cookies
 {

@@ -1,9 +1,9 @@
-using Exact.Base;
-using Exact.Components;
-using Exact.EContent;
-using Exact.Routing;
+using HTMBack.Base;
+using HTMBack.Components;
+using HTMBack.EContent;
+using HTMBack.Routing;
 
-namespace Exact.Builtins.Contents;
+namespace HTMBack.Builtins.Contents;
 
 public class StaticFile(string routePath, string filePath, bool cache = false, ContentTemplate? template = null) : IServerContent
 {

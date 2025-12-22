@@ -1,6 +1,6 @@
-using Exact.Routing;
+using HTMBack.Routing;
 
-namespace Exact.EContent;
+namespace HTMBack.EContent;
 
 public interface IServerContent : IProduceContent, IRouted
 {

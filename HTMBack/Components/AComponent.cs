@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Xml;
-using Exact.Base;
-using Exact.EContent;
+using HTMBack.Base;
+using HTMBack.EContent;
 
-namespace Exact.Components;
+namespace HTMBack.Components;
 
 public abstract class AComponent : IProduceContent
 {

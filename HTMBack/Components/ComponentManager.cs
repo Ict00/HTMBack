@@ -1,8 +1,8 @@
 using System.Text;
 using System.Xml;
-using Exact.Base;
+using HTMBack.Base;
 
-namespace Exact.Components;
+namespace HTMBack.Components;
 
 public delegate object CompileAction(ExactContext ctx, XmlNode? node, ComponentManager manager);
 
@@ -75,56 +75,112 @@ public class ComponentManager
         return new(_tagSelectors, selectors, [.._varSelectors, ..vars]);
     }
     
-    public object? TryGetVarObject(string text, ExactContext ctx)
+    public object? TryGetVarObject(string text, ExactContext ctx, ref int i, XmlNode? node = null)
     {
-        text = text.Trim();
-        if (text.StartsWith('@'))
-        {
-            var varName = text.Substring(1);
-            var selector = _varSelectors.Find(x => x.VarName == varName);
+        if (i + 1 >= text.Length || text[i] != '{' || text[i + 1] != '{') return null;
+        
+        i += 2;
+        string varDefinition = string.Empty;
 
-            if (selector != null)
+        for (; i < text.Length; i++)
+        {
+            if (i + 1 < text.Length && text[i] == '}' && text[i + 1] == '}')
             {
-                return selector.Action(ctx, null, this);
+                i += 1;
+                varDefinition = varDefinition.Trim();
+                break;
             }
+            varDefinition += text[i];
+        }
+
+        bool doInverse = false;
+
+        if (varDefinition[0] == '!')
+        {
+            doInverse = true;
+            varDefinition = varDefinition.Substring(1);
+        }
+
+        List<string> fieldLevels = [varDefinition];
+
+        if (varDefinition.Contains('.'))
+        {
+            fieldLevels = varDefinition.Split('.').ToList();
+        }
+                
+        string varName = fieldLevels[0];
+                
+        var selector = _varSelectors.Find(x => x.VarName == varName);
+
+        if (selector != null)
+        {
+            var obj = selector.Action(ctx, node, this);
+            if (obj is bool b)
+            {
+                if (doInverse)
+                {
+                    return !b;
+                }
+            }
+            else
+            {
+                if (fieldLevels.Count > 1)
+                {
+                    object? GetRecProperty(string property, object? objct, int index)
+                    {
+                        if (objct != null)
+                        {
+                            var newObj = objct.GetType().GetProperty(property)?.GetValue(objct);
+
+                            if (index < fieldLevels.Count-1)
+                            {
+                                        
+                                return GetRecProperty(fieldLevels[index+1], newObj, index+1);
+                            }
+                                    
+                            return newObj;
+                        }
+                        return null;
+                    }
+
+                    return GetRecProperty(fieldLevels[1], obj, 1);
+                }
+                return obj;
+            }
+        }
+        else
+        {
+            return varDefinition;
         }
 
         return null;
     }
     
-    public string TryGetVar(string text, ExactContext ctx)
+    public string TryGetVar(string text, ExactContext ctx, XmlNode? node = null)
     {
         text = text.Trim();
-        if (text.StartsWith('@'))
-        {
-            var varName = text.Substring(1);
-            var selector = _varSelectors.Find(x => x.VarName == varName);
+        StringBuilder builder = new();
 
-            if (selector != null)
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (text[i] == '{')
             {
-                return selector.Action(ctx, null, this)?.ToString() ?? "";
+                builder.Append(TryGetVarObject(text, ctx, ref i, node));
+            }
+            else
+            {
+                builder.Append(text[i]);
             }
         }
-
-        return text;
+        
+        return builder.ToString();
     }
 
     private string TryGetVar(XmlNode node, ExactContext ctx)
     {
         string text = node.Value!;
-        text = text.Trim();
-        if (text.StartsWith('@'))
-        {
-            var varName = text.Substring(1);
-            var selector = _varSelectors.Find(x => x.VarName == varName);
 
-            if (selector != null)
-            {
-                return selector.Action(ctx, node, this)?.ToString() ?? "";
-            }
-        }
-
-        return text;
+        return TryGetVar(text, ctx, node);
     }
     
     // TODO: REWORK VAR REPLACEMENTS

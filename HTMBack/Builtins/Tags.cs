@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Text;
 using System.Xml;
-using Exact.Components;
+using HTMBack.Components;
 
-namespace Exact.Builtins;
+namespace HTMBack.Builtins;
 
 public static class Tags
 {
@@ -47,7 +47,8 @@ public static class Tags
         {
             StringBuilder builder = new();
             var str = node.Attributes["collection"]!.Value;
-            object? collection = mgr.TryGetVarObject(str, ctx);
+            int b = 0;
+            object? collection = mgr.TryGetVarObject(str, ctx, ref b);
 
             var newMgr = mgr.DeriveWith([]);
 

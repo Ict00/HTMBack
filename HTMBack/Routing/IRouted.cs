@@ -1,4 +1,4 @@
-namespace Exact.Routing;
+namespace HTMBack.Routing;
 
 public interface IRouted
 {
