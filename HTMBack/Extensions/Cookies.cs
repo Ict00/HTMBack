@@ -1,7 +1,9 @@
 using System.Net;
+using HTMBack.Base;
+
 #pragma warning disable CS8601
 
-namespace HTMBack.Base;
+namespace HTMBack.Extensions;
 
 public static class Cookies
 {
@@ -23,5 +25,12 @@ public static class Cookies
         {
             ctx.Response.SetCookie(cookie);
         }
+    }
+
+    extension(ExactContext ctx)
+    {
+        public Cookie? GetCookie(string name) => ctx.Ctx.GetCookie(name);
+        public bool TryGetCookie(string name, out Cookie cookie) => ctx.Ctx.TryGetCookie(name, out cookie);
+        public void SetCookie(Cookie cookie) => ctx.Ctx.SetCookie(cookie);
     }
 }
