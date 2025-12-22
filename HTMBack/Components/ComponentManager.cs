@@ -12,37 +12,19 @@ public record VarSelector(string VarName, CompileAction Action);
 
 public class ComponentManager
 {
-    private Dictionary<(string? tag, string attr), CompileAction> _attributeSelectors;
     private List<TagSelector> _tagSelectors;
     private List<VarSelector> _varSelectors;
 
     public ComponentManager(List<TagSelector>? tagSelectors = null,
-        List<AttributeSelector>? attributeSelectors = null,
         List<VarSelector>? varSelectors = null)
     {
         _varSelectors = varSelectors ?? [];
         _tagSelectors = tagSelectors ?? [];
-        _attributeSelectors = new Dictionary<(string? tag, string attr), CompileAction>();
-        
-        if (attributeSelectors != null)
-        {
-            foreach (var i in attributeSelectors)
-            {
-                var tag = i.OnlyForTag;
-                var attr = i.AttributeName;
-                _attributeSelectors.Add((tag, attr), i.Action);
-            }
-        }
     }
 
     public void AttachTag(string tag, CompileAction action)
     {
         _tagSelectors.Add(new TagSelector(tag, action));
-    }
-
-    public void AttachAttribute(string attr, CompileAction action, string? onlyForTag = null)
-    {
-        _attributeSelectors.Add((onlyForTag, attr), action);
     }
 
     public void UpdateVar(string var, CompileAction newAction)
@@ -66,13 +48,7 @@ public class ComponentManager
 
     public ComponentManager DeriveWith(List<VarSelector> vars)
     {
-        List<AttributeSelector> selectors = [];
-        foreach (var i in _attributeSelectors)
-        {
-            selectors.Add(new(i.Key.Item2, i.Value,  i.Key.Item1));
-        }
-        
-        return new(_tagSelectors, selectors, [.._varSelectors, ..vars]);
+        return new(_tagSelectors, [.._varSelectors, ..vars]);
     }
     
     public object? TryGetVarObject(string text, ExactContext ctx, ref int i, XmlNode? node = null)
@@ -207,19 +183,6 @@ public class ComponentManager
                 foreach (XmlAttribute attr in element.Attributes)
                 {
                     CompileAction? action = null;
-                    if (_attributeSelectors.ContainsKey((tagName, attr.Name)))
-                    {
-                        action = _attributeSelectors[(tagName, attr.Name)];
-                    }
-                    
-                    
-                    if (action == null)
-                    {
-                        if (_attributeSelectors.ContainsKey((null, attr.Value)))
-                        {
-                            action = _attributeSelectors[(null, attr.Name)];
-                        }
-                    }
 
                     if (action == null)
                     {

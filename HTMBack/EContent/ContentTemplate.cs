@@ -1,11 +1,11 @@
 namespace HTMBack.EContent;
 
-public record ContentTemplate(string Type = "text/html", int Response = 200);
+public record ContentTemplate(string Type = "text/html", int Response = 200, bool KeepAlive = false);
 
 public static class ContentExtensions
 {
     public static EContent.Content Use(this ContentTemplate template, string content)
     {
-        return new EContent.Content(template.Type, content, template.Response);
+        return new EContent.Content(template.Type, content, template.Response, template.KeepAlive);
     }
 }
