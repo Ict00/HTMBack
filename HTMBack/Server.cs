@@ -39,28 +39,12 @@ public class Server
             while (_listener.IsListening) {
                 try
                 {
+                    Dictionary<string, object> middleInfo = [];
+                    
                     var ctx = await _listener.GetContextAsync();
                     var request = ctx.Request;
 
                     bool doContinue = false;
-
-                    foreach (var i in _middlewares)
-                    {
-                        var result = i.Process(ctx, out var x);
-                        if (result == MiddlewareResult.Fail)
-                        {
-                            var responseContent = x ?? new Content("text/html",
-                                "<h1>Request couldn't be satisfied</h1>", 403);
-                            doContinue = true;
-
-                            byte[] buf = Encoding.UTF8.GetBytes(responseContent.Text);
-                            ctx.Response.ContentLength64 = buf.Length;
-                            ctx.Response.StatusCode = responseContent.ResponseMsg;
-                            ctx.Response.ContentType = responseContent.Type;
-
-                            ctx.Response.OutputStream.Write(buf, 0, buf.Length);
-                        }
-                    }
 
                     if (doContinue)
                         continue;
@@ -81,6 +65,26 @@ public class Server
                     }
 
                     newPath = newPath.Replace("//", "/");
+                    
+                    var exactCtx = ctx.ToExact(vars, newPath, middleInfo);
+                    
+                    foreach (var i in _middlewares)
+                    {
+                        var result = i.Process(exactCtx, out var x);
+                        if (result == MiddlewareResult.Fail)
+                        {
+                            var responseContent = x ?? new Content("text/html",
+                                "<h1>Request couldn't be satisfied</h1>", 403);
+                            doContinue = true;
+
+                            byte[] buf = Encoding.UTF8.GetBytes(responseContent.Text);
+                            ctx.Response.ContentLength64 = buf.Length;
+                            ctx.Response.StatusCode = responseContent.ResponseMsg;
+                            ctx.Response.ContentType = responseContent.Type;
+
+                            ctx.Response.OutputStream.Write(buf, 0, buf.Length);
+                        }
+                    }
 
                     Console.WriteLine($"Requested > {newPath}");
 
@@ -90,7 +94,7 @@ public class Server
                     {
                         if (i.Route.Path == newPath && i.Route.Type == ctx.Request.HttpMethod)
                         {
-                            returnContent = i.Produce(ctx.ToExact(vars), _componentManager);
+                            returnContent = i.Produce(exactCtx, _componentManager);
                             break;
                         }
                     }
@@ -116,6 +120,19 @@ public class Server
         }
     }
 
+    public T GetMiddle<T>() where T : AMiddleware
+    {
+        foreach (var i in _middlewares)
+        {
+            if (i is T t)
+            {
+                return t;
+            }
+        }
+
+        throw new Exception("Target middleware isn't found");
+    }
+    
     public void Using<T>() where T : AMiddleware, new()
     {
         _middlewares.Add(new T());
