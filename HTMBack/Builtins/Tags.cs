@@ -13,19 +13,9 @@ public static class Tags
         {
             StringBuilder builder = new();
             var str =  node.Attributes["condition"]!.Value;
-            bool invert = false;
             
-            if (str.StartsWith("!"))
-            {
-                str = str.Substring(1);
-                invert = true;
-            }
-            
-            var conditionInStr = mgr.TryGetVar(str, ctx);
-            if (bool.TryParse(conditionInStr, out var condition))
-            {
-                if (invert) { condition = !condition; }
-            }
+            int b = 0;
+            bool condition = (bool)(mgr.TryGetVarObject(str, ctx, ref b) ?? false);
 
             if (condition)
             {

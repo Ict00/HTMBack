@@ -77,7 +77,7 @@ public class ComponentManager
             doInverse = true;
             varDefinition = varDefinition.Substring(1);
         }
-
+        
         if (varDefinition[0] == '?')
         {
             checkIfNull = true;
@@ -130,7 +130,12 @@ public class ComponentManager
 
                     if (checkIfNull)
                     {
-                        a = a == null;
+                        if (a is string str)
+                        {
+                            a = string.IsNullOrEmpty(str);
+                        }
+                        else
+                           a = a == null;
                     }
                     
                     if (a is bool c)
@@ -152,7 +157,14 @@ public class ComponentManager
 
                 if (checkIfNull)
                 {
-                    obj = obj == null;
+
+                    if (obj is string str)
+                    {
+                        obj = string.IsNullOrEmpty(str);
+                    }
+                    else
+                        obj = obj == null;
+                    
                     if (doInverse)
                     {
                         return !(bool)obj;
@@ -224,11 +236,7 @@ public class ComponentManager
 
                     if (action == null)
                     {
-                        var addValue = attr.Value;
-                        if (addValue.StartsWith("@"))
-                        {
-                            addValue = TryGetVar(addValue, ctx);
-                        }
+                        var addValue = TryGetVar(attr.Value, ctx);
                         
                         builder.Append($" {attr.Name}=\"{addValue}\"");
                     }
