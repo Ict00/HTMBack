@@ -42,14 +42,14 @@ public static class Tags
 
             var newMgr = mgr.DeriveWith([]);
 
-            if (collection is IEnumerable)
+            if (collection is IEnumerable && collection is not string)
             {
                 dynamic list = collection;
                 if (list.Count > 0)
                 {
                     object? first = list[0];
                     
-                    if (first.GetType().IsPrimitive || first.GetType().IsEnum)
+                    if ((first.GetType().IsPrimitive || first.GetType().IsEnum) || first is string)
                     {
                         string name = "object";
                         if (node.Attributes["element"] != null)
@@ -65,20 +65,19 @@ public static class Tags
                             {
                                 builder.Append(newMgr.CompileXmlToHtml(c, ctx));
                             }
-                            Console.WriteLine($"{name} - {i}");
-                            Console.WriteLine(builder.ToString());
                         }
                     }
                     else
                     {
                         foreach (object i in list)
                         {
-                            foreach (var property in i.GetType().GetProperties())
-                            {
-                                var val = property.GetValue(i);
+                            if (i is not string)
+                                foreach (var property in i.GetType().GetProperties())
+                                {
+                                    var val = property.GetValue(i);
 
-                                newMgr.UpdateVar(property.Name, (_, _, _) => val ?? string.Empty);
-                            }
+                                    newMgr.UpdateVar(property.Name, (_, _, _) => val ?? string.Empty);
+                                }
 
                             foreach (XmlNode c in node.ChildNodes)
                             {
