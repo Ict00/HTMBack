@@ -8,7 +8,7 @@
     
     <PropertyGroup>
         <PackageId>HTMBack</PackageId>
-        <Version>0.1.2</Version>
+        <Version>0.1.3</Version>
         <Authors>Ict00</Authors>
         <Description>Micro web framework for HTMX x C#</Description>
         <PackageTags>web microframework server-side ssr htmx</PackageTags>

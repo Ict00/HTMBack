@@ -16,7 +16,7 @@ public static class Tags
             
             int b = 0;
             bool condition = (bool)(mgr.TryGetVarObject(str, ctx, ref b) ?? false);
-
+            
             if (condition)
             {
                 foreach (XmlNode i in node.ChildNodes)

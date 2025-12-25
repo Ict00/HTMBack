@@ -104,6 +104,8 @@ public class ComponentManager
                 {
                     return !b;
                 }
+
+                return b;
             }
             else
             {
